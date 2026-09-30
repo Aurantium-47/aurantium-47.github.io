@@ -1,0 +1,11 @@
+---
+import { getCollection } from 'astro:content';
+import PageLayout from '../layouts/PageLayout.astro';
+import resume from '../data/resume.json';
+const projects = await getCollection('projects', ({ data }) => !data.draft && data.kind !== '研究');
+type Entry = { title: string; period: string; description: string };
+const education = resume.education as Entry[];
+const experience = resume.experience as Entry[];
+---
+<PageLayout title="项目简历"><section class="page-heading shell resume-heading"><p class="eyebrow">A PROJECT-BASED PROFILE</p><h1>{resume.name}</h1><p>{resume.alias}</p><button class="button print-button" type="button">打印 / 保存为 PDF ↗</button></section><article class="prose resume"><h2>关于我</h2><p>{resume.summary}</p><p class="quiet-note">本页先展示已核实的项目。教育与工作经历将在正式履历补齐后加入。</p>{education.length > 0 && <section><h2>教育经历</h2>{education.map(entry => <div><h3>{entry.title}</h3><p>{entry.period}</p><p>{entry.description}</p></div>)}</section>}{experience.length > 0 && <section><h2>工作经历</h2>{experience.map(entry => <div><h3>{entry.title}</h3><p>{entry.period}</p><p>{entry.description}</p></div>)}</section>}<h2>项目与实践</h2>{projects.map(project => <section class="resume-project"><h3><a href={`/ai/${project.id}/`}>{project.data.title} ↗</a></h3><p>{project.data.description}</p><p><strong>角色：</strong>{project.data.role}</p><p class="mono">{project.data.stack.join(' / ')} · {project.data.status}</p></section>)}<h2>公开链接</h2>{resume.links.map(link => <p><a href={link.url}>{link.label} ↗</a></p>)}</article></PageLayout>
+<script>document.querySelector('.print-button')?.addEventListener('click', () => window.print());</script>

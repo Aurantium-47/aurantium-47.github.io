@@ -1,0 +1,7 @@
+---
+import { getCollection } from 'astro:content';
+import PageLayout from '../../layouts/PageLayout.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+const notes = (await getCollection('notes', ({ data }) => !data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+<PageLayout title="随记"><section class="page-heading shell"><p class="eyebrow">NOTES FROM EVERYDAY LIFE</p><h1>想到了，就写下来<span class="orange">。</span></h1><p>日常碎碎念、日记、偶然读到的东西。<br />这里允许想法还没有长成文章。</p></section><section class="notes-list shell">{notes.map(note => <a class="note-link" href={`/notes/${note.id}/`}><div class="mono"><FormattedDate date={note.data.date} /><span>{note.data.kind}</span></div><h2>{note.data.title}</h2><p>{note.data.description}</p><span class="note-arrow" aria-hidden="true">↗</span></a>)}</section></PageLayout>

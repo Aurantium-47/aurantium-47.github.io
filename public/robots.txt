@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://aurantium-47.github.io/sitemap-index.xml

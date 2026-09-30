@@ -1,0 +1,11 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const references = [
+  { name: 'Maggie Appleton', url: 'https://maggieappleton.com/', text: '数字花园：允许想法生长，让笔记与视觉文章共存。' },
+  { name: 'Nicky Case', url: 'https://ncase.me/', text: '用可以亲手操作的作品，讲清楚一个想法。' },
+  { name: 'Bruno Simon', url: 'https://bruno-simon.com/', text: '给个人网站一个让人记住的互动场景。' },
+  { name: 'Dustin Brett', url: 'https://dustinbrett.com/', text: '把个人内容组织成可以探索的浏览器桌面。' },
+  { name: 'Simon Willison / tools', url: 'https://github.com/simonw/tools', text: '把小工具做成独立、可访问、可以不断增加的网页。' },
+];
+---
+<PageLayout title="灵感与致谢"><section class="page-heading shell"><p class="eyebrow">GOOD THINGS FROM OTHER PEOPLE</p><h1>好作品，值得记下来<span class="orange">。</span></h1><p>这里收纳别人的作品与本站用到的开源底座。<br />每一个名字，都指向原作者。</p></section><article class="prose"><h2>个人网站的形态参考</h2>{references.map(reference => <section class="reference"><h3><a href={reference.url}>{reference.name} ↗</a></h3><p>{reference.text}</p></section>)}<h2>本站实际复用</h2><p>以 <a href="https://github.com/markhorn-dev/astro-nano">Astro Nano</a>（Mark Horn，MIT）的个人博客与作品集结构为起点，移植了页面布局、日期组件、RSS 和内容路由思路，迁移到当前 Astro 内容集合 API。视觉、栏目与内容为本网站重新制作。</p><p>使用 <a href="https://astro.build/">Astro</a>、TypeScript、Markdown、GitHub Pages；拉丁字体采用 Space Grotesk 和 IBM Plex Mono（SIL OFL）。完整许可保存在仓库的 licenses 目录。</p><h2>涌现图鉴</h2><p>由我发起，Codex 协助实现。展馆包含 Anime.js、Tabler Icons 和字体的许可；数学实验参考 Lorenz 系统、Reynolds 的 Boids、Gray–Scott 反应扩散、Chladni 节点图形和 Julia 集。引力与沙粒展项是艺术化近似，具体解释见展馆说明。</p><p>外部参考作品属于各自作者。本站展示的是我们完成的实验与真实渲染；参考页只提供原作者入口。</p></article></PageLayout>

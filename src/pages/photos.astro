@@ -1,0 +1,7 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import rawPhotos from '../data/photos.json';
+type Photo = { src: string; alt: string; caption: string; date: string; public: boolean };
+const photos = (rawPhotos as Photo[]).filter(photo => photo.public);
+---
+<PageLayout title="照片"><section class="page-heading shell"><p class="eyebrow">LITTLE PIECES OF LIFE</p><h1>留住一些光<span class="orange">。</span></h1><p>人物、风景、日常。<br />一些值得多看一眼的瞬间。</p></section><section class="shell photo-section">{photos.length ? <div class="photo-grid">{photos.map(photo => <figure><a href={photo.src}><img src={photo.src} alt={photo.alt} loading="lazy" /></a><figcaption>{photo.caption}<small class="mono">{photo.date}</small></figcaption></figure>)}</div> : <div class="photo-empty"><div class="empty-photo" aria-hidden="true"><span>✳</span></div><div><p class="eyebrow">THE FIRST FRAME</p><h2>第一张，留给生活。</h2><p>相册已经安好，照片还没公开。<br />等一个想留下来的瞬间。</p></div></div>}</section></PageLayout>

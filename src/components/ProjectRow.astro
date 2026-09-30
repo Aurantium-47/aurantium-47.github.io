@@ -1,0 +1,14 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import { art } from '../lib/art';
+interface Props { project: CollectionEntry<'projects'>; number: number }
+const { project, number } = Astro.props;
+const { data } = project;
+---
+<a class="project-row" href={`/ai/${project.id}/`}>
+  <span class="project-number mono">{String(number).padStart(2, '0')}</span>
+  {data.cover ? <Image class="project-thumb" src={art[data.cover]} width={400} format="webp" alt={data.title + '作品画面'} loading="lazy" /> : <div class="project-symbol" aria-hidden="true">{data.kind === '工作流' ? '↗' : '＊'}</div>}
+  <div class="project-copy"><div class="eyebrow">{data.kind} <span class="status">{data.status}</span></div><h3>{data.title}</h3><p>{data.description}</p><div class="tags">{data.stack.map(tag => <span>{tag}</span>)}</div></div>
+  <span class="row-arrow" aria-hidden="true">↗</span>
+</a>

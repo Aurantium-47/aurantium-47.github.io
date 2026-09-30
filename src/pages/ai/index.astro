@@ -1,0 +1,13 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import PageLayout from '../../layouts/PageLayout.astro';
+import ProjectRow from '../../components/ProjectRow.astro';
+import { posters } from '../../lib/art';
+const projects = (await getCollection('projects', ({ data }) => !data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+<PageLayout title="我的 AI 成果" description="橙子的 AI 实践、工作流与创作作品。每个项目说明用途、实现方式和已验证的边界。">
+  <section class="page-heading shell"><p class="eyebrow">THE LABORATORY</p><h1>我的 AI 成果<span class="orange">。</span></h1><p>把 AI 放进真实的调研、工作与创作里。<br />我提出问题、选择方向与验收；AI 帮我把想法做出来。</p></section>
+  <section class="shell"><div class="project-list">{projects.map((project, i) => <ProjectRow project={project} number={i + 1} />)}</div></section>
+  <section class="section shell"><div class="section-heading"><div><p class="eyebrow">GENERATIVE ART</p><h2>六种规则，六个世界。</h2></div><a href="/lab/emergence/" class="text-link">打开互动展馆 ↗</a></div><p class="section-intro">来自已完成作品「涌现图鉴」的真实渲染。点开海报可以看大图。</p><div class="poster-grid">{posters.map(poster => <figure><a href={`/art/${poster.id}/`}><Image src={poster.image} width={700} format="webp" loading="lazy" alt={poster.name + '生成艺术海报'} /></a><figcaption><span>{poster.name}</span><small class="mono">{poster.method}</small></figcaption></figure>)}</div></section>
+</PageLayout>

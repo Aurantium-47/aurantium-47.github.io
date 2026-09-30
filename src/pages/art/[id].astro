@@ -1,0 +1,9 @@
+---
+import { Image } from 'astro:assets';
+import PageLayout from '../../layouts/PageLayout.astro';
+import { posters } from '../../lib/art';
+export function getStaticPaths() { return posters.map(poster => ({ params: { id: poster.id }, props: { poster } })); }
+interface Props { poster: typeof posters[number] }
+const { poster } = Astro.props;
+---
+<PageLayout title={poster.name}><section class="art-page shell"><a href="/ai/" class="text-link">← 我的 AI 成果</a><div class="section-heading"><div><p class="eyebrow">ATLAS OF EMERGENCE</p><h1>{poster.name}</h1><p class="mono">{poster.method}</p></div><a href="/lab/emergence/" class="text-link">进入互动展馆 ↗</a></div><Image src={poster.image} width={1800} format="webp" alt={poster.name + '完整艺术海报'} /></section></PageLayout>
