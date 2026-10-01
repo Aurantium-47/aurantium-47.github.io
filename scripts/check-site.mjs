@@ -21,7 +21,7 @@ for (const file of files(root).filter(path => path.endsWith('.html'))) {
     checked++;
   }
 }
-for (const route of ['index.html', 'ai/index.html', 'notes/index.html', 'photos/index.html', 'about/index.html', 'resume/index.html', 'inspiration/index.html', '404.html', 'rss.xml', 'sitemap-index.xml', 'lab/emergence/index.html']) {
+for (const route of ['index.html', 'ai/index.html', 'skills/index.html', 'notes/index.html', 'photos/index.html', 'about/index.html', 'resume/index.html', 'inspiration/index.html', '404.html', 'rss.xml', 'sitemap-index.xml', 'lab/emergence/index.html']) {
   if (!existsSync(join(root, route))) failures.push(`Missing route: ${route}`);
 }
 if (existsSync(join(root, 'ai/wechat-publishing/index.html'))) failures.push('A draft project was published.');

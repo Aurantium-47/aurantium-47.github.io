@@ -1,0 +1,189 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import { skills } from '../data/skills';
+const categories = [...new Set(skills.map(skill => skill.category))];
+const exampleCount = skills.filter(skill => skill.example || skill.textExample).length;
+---
+<PageLayout title="Skill 收藏" description="从本机使用的 Skills 中挑出的一份小目录：做什么、怎么调用、哪里能看例子，以及原作者。">
+  <div class="shelf shell">
+    <header class="shelf-heading">
+      <div><p class="shelf-kicker">工具 / COLLECTION 01</p><h1>Skill 收藏<span>{String(skills.length).padStart(2, '0')}</span></h1></div>
+      <p class="shelf-intro">先选这 {skills.length} 项，记下用途、调用方法与出处。<br />{exampleCount} 项附样例或实践记录，其余继续补。</p>
+    </header>
+
+    <div class="shelf-layout">
+      <aside class="shelf-index" aria-label="按用途筛选">
+        <p class="index-label">这次想做什么</p>
+        <div class="filters">
+          <button type="button" data-filter="all" aria-pressed="true">全部<span>{skills.length}</span></button>
+          {categories.map(category => <button type="button" data-filter={category} aria-pressed="false">{category}<span>{skills.filter(skill => skill.category === category).length}</span></button>)}
+        </div>
+        <p class="index-note">这里有第三方作品，也有我整理的工作流。归属和验证范围写在每一项里。</p>
+      </aside>
+
+      <section class="shelf-content" aria-label="精选 Skills">
+        <div class="shelf-toolbar">
+          <label class="search-label" for="skill-search">找一个工具<input id="skill-search" type="search" placeholder="名称、用途或关键词" autocomplete="off" /></label>
+          <p class="result-count" aria-live="polite"><span id="visible-count">{skills.length}</span> 项</p>
+        </div>
+        <div class="skill-list">
+          {skills.map((skill, index) => <details class="skill-entry" id={skill.id} data-category={skill.category} data-search={`${skill.name} ${skill.command} ${skill.purpose} ${skill.category} ${skill.input} ${skill.output}`.toLocaleLowerCase()}>
+            <summary>
+              <span class="skill-number">{String(index + 1).padStart(2, '0')}</span>
+              <span class="skill-title"><strong>{skill.name}</strong><span>{skill.purpose}</span></span>
+              <span class="skill-category">{skill.category}{(skill.example || skill.textExample) && <small>有例子</small>}</span>
+              <span class="entry-toggle" aria-hidden="true">+</span>
+            </summary>
+            <div class="entry-body">
+              <dl class="io-pair"><div><dt>给它什么</dt><dd>{skill.input}</dd></div><div><dt>会做什么</dt><dd>{skill.output}</dd></div></dl>
+              <div class="invocation"><div><span class="detail-label">可以这样叫它</span><button type="button" class="copy-invocation" data-copy={skill.invocation} aria-label={`复制 ${skill.name} 的调用短句`}>复制</button></div><p>{skill.invocation}</p><small>先安装对应 Skill；这句是使用示例，不是安装命令。</small></div>
+              {skill.textExample && <section class="text-example" aria-label="本次文字编辑示例"><div><span class="detail-label">改写前</span><p>{skill.textExample.before}</p></div><div><span class="detail-label">改写后</span><p>{skill.textExample.after}</p></div><small>{skill.textExample.note}</small></section>}
+              <div class="entry-footnotes">
+                <div><span class="detail-label">出处</span><p>{skill.credit}</p>{skill.source && <a href={skill.source.url}>{skill.source.label} ↗</a>}</div>
+                <div><span class="detail-label">使用记录</span><p>{skill.verification}</p></div>
+                <div><span class="detail-label">看看效果</span>{skill.example ? <><a href={skill.example.url}>{skill.example.label} ↗</a><p>{skill.example.note}</p></> : <p>还没有可公开的效果样例。</p>}</div>
+              </div>
+              <a class="entry-permalink" href={`#${skill.id}`}>此项链接 <span aria-hidden="true">#</span></a>
+            </div>
+          </details>)}
+        </div>
+        <p class="empty-result" hidden>没有匹配的条目。试试更短的词，或切回“全部”。</p>
+        <p class="shelf-colophon">用途与输入输出是操作说明；实测情况单独标注。外部样例属于原作者，本页不分发 Skill 原文件。</p>
+        <p class="copy-status" role="status" aria-live="polite"></p>
+        <section class="new-find" aria-labelledby="new-find-title">
+          <p class="detail-label">刚找到 · 还没试</p>
+          <h2 id="new-find-title">蜘蛛宇宙风格转绘 <span>SELF-LOVE</span></h2>
+          <p>BALL$Y Club 发布的照片转绘 Skill。用色卡、纹理参考与图像分析，把照片处理成漫画质感；作者原帖有 8 张对照示例。</p>
+          <div class="find-links"><a href="https://www.douyin.com/note/7691497893728356068">看作者效果 ↗</a><a href="https://github.com/chaneX69/self-love">GitHub 与使用说明 ↗</a></div>
+          <small>2026-10-01 发布；尚未安装或实测。MIT 许可针对原创代码与文字，不覆盖电影素材。</small>
+        </section>
+      </section>
+    </div>
+  </div>
+</PageLayout>
+
+<script>
+  const entries = [...document.querySelectorAll<HTMLDetailsElement>('.skill-entry')];
+  const filters = [...document.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+  const search = document.querySelector<HTMLInputElement>('#skill-search')!;
+  const count = document.querySelector('#visible-count')!;
+  const empty = document.querySelector<HTMLElement>('.empty-result')!;
+  const status = document.querySelector<HTMLElement>('.copy-status')!;
+  let activeCategory = 'all';
+  function filterEntries() {
+    const query = search.value.trim().toLocaleLowerCase();
+    let visible = 0;
+    for (const entry of entries) {
+      entry.hidden = !(activeCategory === 'all' || entry.dataset.category === activeCategory) || !entry.dataset.search?.includes(query);
+      if (!entry.hidden) visible++;
+    }
+    count.textContent = String(visible);
+    empty.hidden = visible !== 0;
+  }
+  filters.forEach(button => button.addEventListener('click', () => {
+    activeCategory = button.dataset.filter!;
+    filters.forEach(filter => filter.setAttribute('aria-pressed', String(filter === button)));
+    filterEntries();
+  }));
+  search.addEventListener('input', filterEntries);
+  document.querySelectorAll<HTMLButtonElement>('.copy-invocation').forEach(button => button.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(button.dataset.copy!);
+      status.textContent = '调用短句已复制。';
+      button.textContent = '已复制 ✓';
+      window.setTimeout(() => { button.textContent = '复制'; }, 1800);
+    } catch {
+      status.textContent = '浏览器未允许复制，请直接选中调用短句。';
+    }
+  }));
+  function revealHash() {
+    const target = entries.find(entry => `#${entry.id}` === window.location.hash);
+    if (target) {
+      if (target.hidden) {
+        activeCategory = 'all';
+        search.value = '';
+        filters.forEach(filter => filter.setAttribute('aria-pressed', String(filter.dataset.filter === 'all')));
+        filterEntries();
+      }
+      target.open = true;
+    }
+  }
+  window.addEventListener('hashchange', revealHash);
+  revealHash();
+</script>
+
+<style>
+  .shelf{padding-block:44px 76px;--shelf-line:#acb9ae}
+  .shelf-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:35px;padding-bottom:35px;border-bottom:2px solid var(--ink)}
+  .shelf-kicker,.index-label,.detail-label{font-size:11px;letter-spacing:.05em;color:var(--muted)}
+  .shelf-kicker{font-family:Plex,monospace;margin-bottom:10px}
+  h1{font-family:'STSong','SimSun',serif;font-size:42px;letter-spacing:-.035em;display:flex;align-items:flex-start;gap:17px}
+  h1>span{font:12px Plex,monospace;color:var(--orange);padding-top:7px;letter-spacing:0}
+  .shelf-intro{font-size:13px;line-height:1.9;color:var(--muted);padding-bottom:3px}
+  .shelf-layout{display:grid;grid-template-columns:170px minmax(0,1fr);gap:48px;padding-top:26px}
+  .shelf-index{position:sticky;top:25px;align-self:start}
+  .index-label{margin-bottom:13px}
+  .filters{display:grid;gap:4px}
+  .filters button{display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:left;padding:8px 10px;border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:13px}
+  .filters button span{font:10px Plex,monospace}
+  .filters button:hover{color:var(--ink);background:var(--wash)}
+  .filters button[aria-pressed=true]{color:var(--paper);background:var(--teal)}
+  .index-note{font-size:11px;color:var(--muted);margin-top:29px;padding-top:16px;border-top:1px solid var(--line);line-height:1.9}
+  .shelf-toolbar{display:flex;align-items:flex-end;justify-content:space-between;gap:25px;padding-bottom:18px}
+  .search-label{display:flex;align-items:center;gap:20px;font-size:11px;color:var(--muted);width:min(440px,85%)}
+  input{min-width:0;flex:1;width:100%;background:none;color:var(--ink);border:0;border-bottom:1px solid var(--shelf-line);border-radius:0;font-family:inherit;font-size:13px;padding:7px 0;outline-offset:4px}
+  input::placeholder{color:var(--muted);opacity:.85}
+  input:focus-visible{outline:2px solid var(--orange)}
+  .result-count{font-size:11px;color:var(--muted);white-space:nowrap;padding-bottom:7px}
+  .result-count span{font-family:Plex,monospace;margin-right:4px}
+  .skill-list{border-top:1px solid var(--shelf-line)}
+  .skill-entry{border-bottom:1px solid var(--shelf-line);scroll-margin-top:25px}
+  .skill-entry[hidden]{display:none}
+  summary{display:grid;grid-template-columns:28px minmax(0,1fr) 74px 18px;gap:17px;align-items:center;padding:22px 0;cursor:pointer;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary:focus-visible{outline:2px solid var(--orange);outline-offset:4px}
+  summary:hover .skill-title strong{color:var(--orange)}
+  .skill-number{font:10px Plex,monospace;color:var(--muted);align-self:start;padding-top:7px}
+  .skill-title{min-width:0}
+  .skill-title strong{display:block;font-size:20px;font-weight:500;line-height:1.45;letter-spacing:-.025em}
+  .skill-title>span{display:block;font-size:12px;line-height:1.7;color:var(--muted);margin-top:6px}
+  .skill-category{font-size:10px;color:var(--muted);text-align:right}
+  .skill-category small{display:block;font-size:9px;color:var(--teal);margin-top:4px}
+  .entry-toggle{font:22px Plex,monospace;line-height:1;text-align:right;font-weight:400}
+  details[open] .entry-toggle{transform:rotate(45deg);color:var(--orange)}
+  .entry-body{padding:1px 35px 24px 45px}
+  .io-pair{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin:0 0 21px;font-size:13px}
+  dt{font-size:10px;color:var(--muted);margin-bottom:5px}
+  dd{margin:0;line-height:1.85}
+  .invocation{border-left:2px solid var(--teal);padding:12px 16px;background:#e8eddf80}
+  .invocation>div{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px}
+  .copy-invocation{font-size:10px;line-height:1.5;color:var(--teal);border:0;padding:5px 0 5px 8px;background:none;cursor:pointer;white-space:nowrap}
+  .copy-invocation:hover{text-decoration:underline}
+  .invocation>p{font-size:13px;line-height:1.9;overflow-wrap:anywhere;user-select:all}
+  .invocation>small{display:block;font-size:10px;color:var(--muted);margin-top:7px}
+  .entry-footnotes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;padding-top:20px;font-size:11px;line-height:1.9}
+  .text-example{display:grid;grid-template-columns:1fr 1fr;gap:12px 28px;margin-top:22px;padding-block:18px;border-block:1px solid var(--line)}
+  .text-example p{font-size:12px;line-height:1.9;margin-top:6px}
+  .text-example>div:first-child p{color:var(--muted)}
+  .text-example small{font-size:10px;color:var(--muted);grid-column:1/-1;line-height:1.8}
+  .entry-footnotes .detail-label{font-size:10px;display:block;margin-bottom:5px}
+  .entry-footnotes p{overflow-wrap:anywhere}
+  .entry-footnotes a{display:inline-block;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line);color:var(--teal)}
+  .entry-footnotes a:hover{color:var(--orange)}
+  .entry-permalink{display:block;width:fit-content;font-size:10px;color:var(--muted);margin-top:19px}
+  .entry-permalink span{color:var(--orange);padding-left:5px}
+  .shelf-colophon{font-size:10px;color:var(--muted);margin-top:23px;line-height:1.9}
+  .empty-result{font-size:13px;padding-block:38px;color:var(--muted)}
+  .copy-status{font-size:11px;color:var(--teal);min-height:22px;margin-top:10px}
+  .new-find{border-top:1px solid var(--ink);padding-top:22px;margin-top:25px}
+  .new-find h2{font-size:21px;letter-spacing:-.025em;margin-block:10px}
+  .new-find h2 span{font:9px Plex,monospace;color:var(--muted);margin-left:10px;letter-spacing:.04em}
+  .new-find>p:not(.detail-label){font-size:12px;max-width:670px;line-height:1.9}
+  .find-links{display:flex;flex-wrap:wrap;gap:22px;margin-block:13px;font-size:12px}
+  .find-links a{text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--shelf-line)}
+  .find-links a:hover{color:var(--orange)}
+  .new-find small{display:block;font-size:10px;color:var(--muted);line-height:1.8}
+  @media(max-width:640px){.text-example{grid-template-columns:1fr}}
+  @media(max-width:900px){.shelf-layout{grid-template-columns:130px minmax(0,1fr);gap:27px}.shelf-intro{font-size:12px}.entry-footnotes{grid-template-columns:1fr 1fr}.entry-body{padding-right:0}.skill-title strong{font-size:18px}.search-label{display:block}.search-label input{display:block;font-family:inherit}}
+  @media(max-width:640px){.shelf{padding-top:29px}.shelf-heading{display:block;padding-bottom:24px}h1{font-size:36px}.shelf-intro{margin-top:14px}.shelf-layout{display:block;padding-top:18px}.shelf-index{position:static}.index-label{margin-bottom:8px}.filters{display:flex;flex-wrap:wrap;gap:5px}.filters button{font-size:11px;padding:5px 9px;gap:8px}.index-note{display:none}.shelf-toolbar{margin-top:22px;padding-bottom:15px}.search-label{width:85%}.search-label input{font-size:16px;line-height:1.6;padding-top:3px}.result-count{padding-bottom:8px}summary{grid-template-columns:20px minmax(0,1fr) 15px;gap:10px;padding-block:20px}.skill-category{display:none}.skill-title strong{font-size:19px}.skill-title>span{font-size:12px;line-height:1.8}.entry-body{padding-left:30px;padding-bottom:21px}.io-pair{grid-template-columns:1fr;gap:14px;margin-bottom:18px;font-size:12px}.invocation{padding:10px 12px}.invocation>p{font-size:12px}.entry-footnotes{grid-template-columns:1fr;gap:15px;padding-top:17px}.entry-permalink{margin-top:14px}}
+</style>

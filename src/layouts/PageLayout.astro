@@ -5,7 +5,7 @@ import { site } from '../site';
 interface Props { title: string; description?: string; image?: string }
 const { title, description = site.description, image = '/social-card.png' } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const nav = [['/', '首页'], ['/ai/', 'AI 成果'], ['/notes/', '随记'], ['/photos/', '照片'], ['/about/', '关于我']];
+const nav = [['/', '首页'], ['/ai/', 'AI 成果'], ['/skills/', 'Skills'], ['/notes/', '随记'], ['/photos/', '照片'], ['/about/', '关于我']];
 ---
 <!doctype html>
 <html lang="zh-CN">
